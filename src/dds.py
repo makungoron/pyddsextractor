@@ -111,7 +111,7 @@ class DDS:
         hs = []
         for n in range(n_blocks):
             hs.append(np.hstack(s[n*256:n*256+256]))
-        img = np.vstack(hs)
+        img = np.flipud(np.vstack(hs))
         return img
 
 
@@ -136,14 +136,12 @@ class DDS:
             print('alpha 0:', alpha0)
             print('alpha 1:', alpha1)
         # NOTE: Loading data with little endian
-        data =  block[6:8][::-1] + block[2:6][::-1]
+        data = int.from_bytes(block[2:], 'little', signed=False)
 
-        # convert data to 3[bit]x8[pixel]
-        # NOTE: this method may cause low speed and require many memories.
-        raw = ''.join([bin(t)[2:].zfill(8) for t in data])
+        # convert data to 3[bit]x16[pixel]
+        pixels_indexes = [(data >> (i*3)) & 0x07 for i in range(16)]
         if verbose:
-            print('raw:', ''.join([c+(' ' if i % 3 == 0 else '') for i, c in enumerate(raw, 1)]))
-        pixels_bits = [int(raw[i:i+3], base=2) for i in range(0, len(raw), 3)]
+            print('indexes:', *pixels_indexes)
 
         # BC4 UNORM interpolation
         colors = {}
@@ -151,8 +149,6 @@ class DDS:
         colors[1] = alpha1
         if alpha0 > alpha1:
             # 6 interpolated color values
-            # for i in range(2, 8):
-            #     colors[i] = (alpha0*(7-i+1) + alpha1*(i-1)) / 7
             colors[2] = (alpha0 * 6 + alpha1 * 1) / 7
             colors[3] = (alpha0 * 5 + alpha1 * 2) / 7
             colors[4] = (alpha0 * 4 + alpha1 * 3) / 7
@@ -161,8 +157,6 @@ class DDS:
             colors[7] = (alpha0 * 1 + alpha1 * 6) / 7
         else:
             # 4 interpolated color values
-            # for i in range(2, 6):
-            #     colors[i] = (alpha0*(5-i+1) + alpha1*(i-1)) / 5
             colors[2] = (alpha0 * 4 + alpha1 * 1) / 5
             colors[3] = (alpha0 * 3 + alpha1 * 2) / 5
             colors[4] = (alpha0 * 2 + alpha1 * 3) / 5
@@ -170,10 +164,9 @@ class DDS:
             colors[6] = 0
             colors[7] = 255
 
-        pixels = [colors[int(b)] for b in pixels_bits]
-        pixels = pixels[8:][::-1] + pixels[:8][::-1]
+        pixel_colors = [colors[ind] for ind in pixels_indexes]
 
         if verbose:
-            print('pixels_bits:', pixels_bits)
-            print(pixels)
-        return np.array(pixels).reshape(4, 4).astype(np.uint8)
+            print('pixel_colors:', pixel_colors)
+        pixels = np.array(pixel_colors).reshape(4, 4).astype(np.uint8)
+        return pixels
