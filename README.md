@@ -4,18 +4,16 @@ DDS Extractor using Python
 
 ## Make Environments
 
-### Method 1 (required): Using Docker
+### Method 1 (Recommended): Docker
 
-Use `Docker Compose`.
-
-Create an image and a container
+1. Create an image and a container
 
 ```bash
 cd docker/dev
 docker compose up -d
 ```
 
-Run bash in the container
+2. Run bash in the container
 
 ```bash
 cd docker/dev
@@ -23,9 +21,9 @@ docker compose exec dev main
 # Or, docker exec -it <container_name or container_id> bash
 ```
 
-### Method 2: Use venv
+### Method 2: venv
 
-Python 3.11 or above is recommended.
+Python>=3.11 recommended.
 
 1. Make venv
 ```bash
@@ -34,7 +32,7 @@ cd <this_project_root_dir>
 python3 -m venv .venv
 ```
 
-2. Activate venv
+1. Activate venv
 
 On macOS/Linux,
 
@@ -42,15 +40,15 @@ On macOS/Linux,
 source .venv/bin/activate
 ```
 
-on Windows PowerShell or CMD,
+On Windows, PowerShell or CMD,
 
-```bash
+```cmd
 .\venv\Scripts\activate
 ```
 
-3. install requirements
+2. install required python packages
 
-Please run below in venv enviromnent.
+Please run following commands in venv:
 
 ```bash
 pip install --upgrade pip
