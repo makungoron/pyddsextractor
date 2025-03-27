@@ -3,10 +3,10 @@ services:
   dev:
     platform: linux/x86_64
     build:
-      context: .
+      context: ../../
       dockerfile: ./docker/dev/Dockerfile
-    volumes:
-      - .:/app
     tty: true
+    command: bash
     working_dir: /app
-    command: /bin/bash
+    volumes:
+      - ../..:/app
